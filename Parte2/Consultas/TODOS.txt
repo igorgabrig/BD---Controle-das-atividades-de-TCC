@@ -1,0 +1,81 @@
+------------------------------------------------Nº 1 ------------------------------------------------
+SELECT tcc_etapa as ETAPA, alu_nome as ALUNO, tcc_inicio as INICIO, tcc_conclusao as CONCLUSAO, cur_nome as CURSO, dep_nome as DEPARTAMENTO
+	FROM aluno, curso, tcc, departamento
+	WHERE aluno.cur_codigo = curso.cur_codigo and curso.dep_codigo = departamento.dep_codigo AND curso.dep_codigo = 1 AND tcc.alu_ra = aluno.alu_ra
+	GROUP BY alu_nome
+	ORDER BY alu_nome ASC;
+------------------------------------------------Nº 1 ------------------------------------------------
+
+------------------------------------------------Nº 2 ------------------------------------------------
+
+select t.tcc_etapa as 'Etapa', tcc_titulo as 'Titulo', lin_descricao as 'Linha de Pesquisa', alu_nome as 'Aluno', pro_nome as 'Professor', tcc_inicio as 'Inicio', tcc_conclusao as 'Conclusao'
+from tcc t, linha l, aluno a, professor p
+where a.alu_ra = t.alu_ra and t.lin_codigo = l.lin_codigo and t.pro_siape_orientador = p.pro_siape and pro_siape = 1 and tcc_etapa = 'TCC1' and tcc_inicio between '2017-00-00' and '2017-12-30'
+order by tcc_inicio desc;
+
+------------------------------------------------Nº 2 ------------------------------------------------
+
+------------------------------------------------Nº 4 ------------------------------------------------
+
+select tcc_etapa as 'ETAPA DO TCC', alu_nome 'NOME DO ALUNO(A)', pro_nome 'NOME DO ORIENTADOR(A)', date_format(ban_data, '%d/%m/%y') as 'DATA DA BANCA',  date_format(ban_data, '%H:%i') 'HORÁRIO DA BANCA', s.sal_codigo 'SALA', pre_nome 'PREDIO'
+from banca b natural join aluno a natural join sala s natural join predio pre, professor pro 
+where ban_data between '2015-01-01' and '2016-12-12' and
+Extract(hour from ban_data) >= '12:00' and Extract(hour from ban_data) <= '18:00' and
+b.pro_siape_orientador = pro.pro_siape
+/*banca b, sala s, predio p
+where b.sal_codigo = s.sal_codigo and
+s.pre_codigo = p.pre_codigo and
+ban_data between '2015-01-01' and '2016-12-12' and
+ban_data between '08:00' and '12:00'*/
+group by ban_data asc;
+
+------------------------------------------------Nº 4 ------------------------------------------------
+
+------------------------------------------------Nº 5 ------------------------------------------------
+select distinct pro_siape as SIAPE, pro_nome as Nome, dep_sigla as Departamento
+from professor p, departamento d
+where p.dep_codigo = d.dep_codigo and p.pro_siape not in (select banca.pro_siape_membro2 
+															from professor, banca 
+															where professor.pro_siape != banca.pro_siape_membro2)
+order by dep_sigla asc;
+------------------------------------------------Nº 5 ------------------------------------------------
+
+------------------------------------------------Nº 6 ------------------------------------------------
+select lin_descricao as 'Linha de Pesquisa', pro_nome as 'Professor'
+from ((linha left outer join pesquisa on linha.lin_codigo = pesquisa.lin_codigo) left outer join professor on pesquisa.pro_siape = professor.pro_siape)
+order by lin_descricao asc;
+------------------------------------------------Nº 6 ------------------------------------------------
+
+------------------------------------------------Nº 7 ------------------------------------------------
+select lin_descricao as Linha, tcc_etapa as Etapa, count(tcc_etapa) as QuantidadePorEtapas
+from linha, tcc
+where linha.lin_codigo in (select lin_codigo
+							from tcc
+							where tcc.tcc_conclusao <= '2017/06/19 20:00')
+			and linha.lin_codigo = tcc.lin_codigo
+group by linha.lin_codigo, tcc.tcc_etapa
+having QuantidadePorEtapas > 1;
+------------------------------------------------Nº 7 ------------------------------------------------
+
+------------------------------------------------Nº 8 ------------------------------------------------
+select s.sal_codigo as 'Codigo da Sala', Pre_Nome as 'Nome Do Predio'
+from banca b right outer join sala s 
+on b.sal_codigo = s.sal_codigo natural join predio
+where b.sal_codigo is null;
+
+OU 
+
+select s.sal_codigo as 'Codigo da Sala', Pre_Nome as 'Nome Do Predio'
+from sala s, predio p
+where not exists(select * from banca b
+				where b.sal_codigo = s.sal_codigo and b.ban_data between '2016-01-01' and '2016-12-30' ) and
+s.pre_codigo = p.pre_codigo
+group by s.sal_codigo;
+------------------------------------------------Nº 8 ------------------------------------------------
+
+------------------------------------------------Nº 9 ------------------------------------------------
+SELECT pro_nome as 'NOME', COUNT(pro_siape_orientador) as 'QNT ORIENT'
+	FROM professor left outer join tcc on tcc.pro_siape_orientador = professor.pro_siape
+	GROUP BY professor.pro_nome;
+------------------------------------------------Nº 9 ------------------------------------------------
+
